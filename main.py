@@ -46,11 +46,32 @@ class TestEnemy(pygame.sprite.Sprite):
         self.image.fill("Red")
         self.rect = self.image.get_rect(midbottom = (100,580))
         self.gravity = 0
+        self.turn_after = SCREEN_WIDTH
+        self.pace_time = 0
+        self.pace_size = 5
+        self.pace_count = 0
+        self.direction = -1
+        self.speed = 10
 
     def run(self):
-        self.rect.x += 5
-        if self.rect.x == 100:
-            self.rect.x -= 5
+        time_now = pygame.time.get_ticks()
+        if (time_now > self.pace_time + self.speed):
+            self.pace_time = time_now
+
+            # Walk Pace in the current Direction!
+            self.pace_count += 1
+            self.rect.x += self.direction * self.pace_size
+
+            if(self.pace_count >= self.turn_after):
+                self.direction *= -1
+                self.pace_count = 0
+            if (self.rect.x <= 0):
+                self.direction = 1
+                self.pace_count = 0
+            elif (self.rect.x >= SCREEN_WIDTH - self.rect.width):
+                self.direction = -1
+                self.pace_count = 0
+
 
     def update(self):
         self.run()
