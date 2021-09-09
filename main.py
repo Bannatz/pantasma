@@ -1,6 +1,7 @@
 import pygame
 from sys import exit
 from screen_settings import *
+import random
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -10,6 +11,8 @@ class Player(pygame.sprite.Sprite):
         self.image.fill("Black")
         self.rect = self.image.get_rect(midbottom = (50,580))
         self.gravity = 0
+        global rect 
+        rect = self.rect.x
 
     def control(self):
         keys = pygame.key.get_pressed()
@@ -18,15 +21,20 @@ class Player(pygame.sprite.Sprite):
             if self.rect.bottom == 580:
                 self.gravity = -25
         
-        elif keys[pygame.K_d]:
+        if keys[pygame.K_d]:
             self.rect.x += 5
         
-        elif keys[pygame.K_a]:
+        if keys[pygame.K_a]:
             self.rect.x -= 5
         
-        elif keys[pygame.K_s]:
+        if keys[pygame.K_s]:
             self.gravity = + 10
     
+    def get_rect():
+        r = rect
+        return r
+
+
     def apply_gravity(self):
         self.gravity += 1
         self.rect.y += self.gravity
@@ -38,12 +46,13 @@ class Player(pygame.sprite.Sprite):
         self.apply_gravity()
 
 
+
 class TestEnemy(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((50,50))
-        self.image.fill("Red")
+        slime_image = pygame.image.load("data/Sprites/Slimes/Slime_Green.png").convert_alpha()
+        self.image = pygame.transform.rotozoom(slime_image,0,3)
         self.rect = self.image.get_rect(midbottom = (100,580))
         self.gravity = 0
         self.turn_after = SCREEN_WIDTH
@@ -52,6 +61,9 @@ class TestEnemy(pygame.sprite.Sprite):
         self.pace_count = 0
         self.direction = -1
         self.speed = 10
+        self.gravity = 0
+        #self.target = Player()
+        
 
     def run(self):
         time_now = pygame.time.get_ticks()
@@ -72,9 +84,29 @@ class TestEnemy(pygame.sprite.Sprite):
                 self.direction = -1
                 self.pace_count = 0
 
+    def jump(self):
+        ran = random.randint(1, 4)
+        print(ran)
+        if ran == 2:
+            if self.rect.bottom == 580:
+                self.gravity += -25
+        if ran == 3:
+            if self.rect.bottom == 580:
+                self.gravity += -30
+        
+        
+    def apply_gravity(self):
+        self.gravity += 1
+        self.rect.y += self.gravity
+        if self.rect.bottom >= 580:
+            self.rect.bottom = 580
+
 
     def update(self):
         self.run()
+        self.jump()
+        self.apply_gravity()
+
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
@@ -98,13 +130,13 @@ sprites.add(player)
 
 enemy = pygame.sprite.GroupSingle()
 enemy.add(TestEnemy())
-
+delta_time = pygame.time.get_ticks()
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-    
+ 
     screen.fill("#d1f4f7")
     screen.blit(sky_surface,(0,100))
     screen.blit(ground_surface,(0,580))
